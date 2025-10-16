@@ -1,4 +1,4 @@
-# Banka - Core Banking Application
+# Domblur Bank - Core Banking Application
 
 Banka is a lightweight core banking application that provides users with essential banking functionalities. It features a secure backend built with Django and a dynamic frontend using vanilla JavaScript. Users can sign up, manage multiple accounts, and perform transactions like deposits, withdrawals, and transfers.
 
