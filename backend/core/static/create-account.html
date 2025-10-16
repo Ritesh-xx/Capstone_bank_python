@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Banka - Create Account</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/css/styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Sans">
+    <script src="assets/js/auth-guard.js" defer></script>
+</head>
+<body>
+    <!-- Begin Header -->
+    <header>
+            <nav class="navbar">
+                    <a href="../../../Banka/UI" class="navbar-logo">Banka</a>
+                    <button class="hamburger-menu"><a class="hamburger"></a></button>
+                    <ul class="navbar-menu">
+                        <li class="navbar-link"><a href="../templates/index.html">Home</a></li>
+                        <li class="navbar-link"><a href="user-dashboard.html">My Profile</a></li>
+                        <li class="navbar-link"><a href="../templates/index.html">Log Out</a></li>
+                    </ul>
+                </nav>
+
+          </header>
+          <!-- End Header -->
+          <main>
+            <section class="container form-container">
+              <h2 class="section-title">Create Account</h2>
+              <form class="form-card" action="" method="">
+                  <div class="errors">
+                  <ul>
+
+                  </ul>
+                </div>
+              <label for="account-type">Account Type</label>
+                <select
+                  type="text"
+                  id="account-type"
+                  name="account-type"
+                  class="form-element"
+                  required>
+                  <option default>-- Savings/Current? --</option>
+                  <option value="savings">Savings</option>
+                  <option value="current">Current</option>
+                </select>
+                <div class="error" id="account-type-error"></div>
+
+                    <label for="opening-amount">Opening Amount</label>
+                    <input
+                      type="number"
+                      id="opening-amount"
+                      name="opening-amount"
+                      class="form-element"
+                      placeholder="10000.00"
+                      required/>
+                      <div class="error" id="opening-amount-error"></div>
+                  <button type="submit" class="btn btn-primary">Create Account</button>
+                </form>
+                </section>
+            </main>
+
+    <!-- Begin Footer -->
+    <footer>
+        <p class="credits">Banka | Copyright &copy; Andela 2019</p>
+    </footer>
+    <!-- End Footer -->
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/create-account.js"></script>
+</body>
+
+</html>
+

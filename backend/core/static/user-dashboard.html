@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+    <title>Banka - User Dashboard</title>
+    <link rel="stylesheet" href="assets/css/styles.css"/>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet"/>
+    <script src="assets/js/auth-guard.js" defer></script>
+</head>
+
+<body>
+<div class="modal-toggle"></div>
+<!-- Begin Header -->
+<header>
+    <nav class="navbar">
+        <a href="/" class="navbar-logo">Banka</a>
+        <button class="hamburger-menu"><a class="hamburger"></a></button>
+        <ul class="navbar-menu">
+            <li class="navbar-link"><a href="create-account.html">Create Account</a></li>
+            <li class="navbar-link"><a href="#" onclick="openModal('depositModal')">Deposit</a></li>
+            <li class="navbar-link"><a href="#" onclick="openModal('withdrawModal')">Withdraw</a></li>
+            <li class="navbar-link"><a href="#" onclick="openModal('transferModal')">Transfer</a></li>
+           <li class="navbar-link"><a href="#" onclick="logout()">Log Out</a></li>
+        </ul>
+    </nav>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('depositModal')">&times;</span>
+            <h2>Deposit Money</h2>
+            <form id="depositForm" onsubmit="submitDeposit(event)">
+                <label>Amount:</label>
+                <input type="number" id="depositAmount" min="1" required/>
+                <br/><br/>
+
+                <label>Select Account:</label>
+                <select id="depositAccountSelect" required>
+                    <!-- Options will be populated dynamically -->
+                </select>
+                <br/><br/>
+
+                <button type="submit" class="btn-submit">Deposit</button>
+                <button type="button" onclick="closeModal('depositModal')">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('withdrawModal')">&times;</span>
+        <h2>Withdraw Money</h2>
+        <form id="withdrawForm" onsubmit="submitWithdraw(event)">
+            <label>Amount:</label>
+            <input type="number" id="withdrawAmount" min="1" required/>
+            <br/><br/>
+
+            <label>Select Account:</label>
+            <select id="withdrawAccountSelect" required>
+                </select>
+            <br/><br/>
+
+            <button type="submit" class="btn-submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+    <!-- Transfer Modal -->
+<div id="transferModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal('transferModal')">&times;</span>
+        <h2>Transfer Money</h2>
+        <form id="transferForm" onsubmit="submitTransfer(event)">
+            <label>From Account:</label>
+            <select id="transferFromAccountSelect" required>
+                </select>
+            <br/><br/>
+
+            <label>Recipient Account Number:</label>
+            <input type="text" id="transferAccount" required/>
+            <br/><br/>
+
+            <label>Amount:</label>
+            <input type="number" id="transferAmount" min="1" required/>
+            <br/><br/>
+
+            <button type="submit" class="btn-submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+</header>
+<!-- End Header -->
+<!-- Begin Main Section -->
+<main>
+    <section class="container">
+        <div class="profile">
+            <div class="card profile-card">
+                <!-- Copied and edited from https://www.w3schools.com/howto/howto_css_image_overlay.asp -->
+                <div class="profile-picture">
+                    <img src="/static/assets/img/ricion.jpg" id="img-preview" alt="Profile Picture" class="image"
+                         style="width:100%"/>
+
+                    <div class="middle">
+                        <!-- copied and edited from http://jsfiddle.net/a4Jtz/6/ -->
+                        <li class="upload">
+                            <form>
+                                <div class="fupload">
+                                    click to upload
+                                </div>
+                                <input type="file" name="upload" id="rupload" class="rupload"/>
+                            </form>
+                        </li>
+                    </div>
+                </div>
+                <p>
+                <h2 id="user-name"></h2>
+                </p>
+
+                <!--                    <table id="account-content" class="stats-table">-->
+
+                <!--                        <tr>-->
+                <!--                            <th>Account Number</th>-->
+                <!--                            <th>Account Type</th>-->
+                <!--                            <th>Balance</th>-->
+                <!--                            <th>View Transactions</th>-->
+                <!--                        </tr>-->
+
+                <!--                    </table>-->
+                <div id="account" class="stats-table"></div>
+            </div>
+            <div class="profile-table">
+                <h2 class="feature">Transaction History</h2>
+                <div class="errors">
+                    <ul>
+
+                    </ul>
+                </div>
+                <!-- <table id="transaction-table" class="stats-table">
+                    <tr>
+                        <th>Date</th>
+                        <th>Account Number</th>
+                        <th>Transaction type</th>
+                        <th>Amount</th>
+                        <th>Old Balance</th>
+                        <th>New Balance</th>
+                    </tr>
+                </table> -->
+                <div id="transaction" class="stats-table"></div>
+            </div>
+        </div>
+        <!-- Modal Section -->
+
+        <!-- The Modal -->
+        <div id="myModal" class="modal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <div>
+                    <div class="modal-header">
+                        <h1>Transaction Record</h1>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="modal-account-details">
+                            <div class="words">
+                                <div class="meaning">
+                                    <h3>Date</h3>
+                                </div>
+                                <div class="meaning">
+                                    16-02-2016 11:30am
+                                </div>
+                            </div>
+                            <div class="words">
+                            </div>
+                            <div class="words">
+                                <div class="meaning">
+                                    <h3>Transaction Type</h3>
+                                </div>
+                                <div class="meaning">
+                                    Credit
+                                </div>
+                            </div>
+
+
+                            <div class="words">
+                                <div class="meaning">
+                                    <h3>Amount(&#x20A6;)</h3>
+                                </div>
+                                <div class="meaning">
+                                    100000
+                                </div>
+                            </div>
+                            <div class="words">
+                                <div class="meaning">
+                                    <h3>Old Balance(&#x20A6;)</h3>
+                                </div>
+                                <div class="meaning">
+                                    100000
+                                </div>
+                            </div>
+                            <div class="words">
+                                <div class="meaning">
+                                    <h3>New Balance(&#x20A6;)</h3>
+                                </div>
+                                <div class="meaning">
+                                    200000
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Main Section -->
+    </section>
+</main>
+<!-- End Main Section -->
+<!-- Begin Footer -->
+<footer>
+    <p class="credits">Banka | Copyright &copy; Andela 2019</p>
+</footer>
+<!-- End Footer -->
+
+<script src="assets/js/user.js"></script>
+</body>
+
+</html>
+
+<!--
+<script>
+    /* eslint-disable no-return-assign */
+    /* eslint-disable no-unused-vars */
+
+    const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+    const token = localStorage.getItem('token');
+
+    const errorDiv = document.querySelector('.errors');
+    const errorContainer = document.querySelector('.errors ul');
+    const userName = document.getElementById('user-name');
+    const accountsTabContent = document.getElementById('account');
+    const transactionHistoryDiv = document.getElementById('transaction'); // Get the container for the transaction table
+
+    const append = (parent, el) => parent.appendChild(el);
+    const createNode = element => document.createElement(element);
+
+    const options = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    };
+
+    const showError = (message) => {
+        errorDiv.style.display = 'block';
+        errorDiv.style.color = 'red';
+        errorContainer.innerHTML = '';
+        const msg = createNode('li');
+        msg.textContent = message;
+        append(errorContainer, msg);
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+            errorContainer.innerHTML = '';
+        }, 5000);
+    };
+
+    const loadProfileDetails = () => {
+        if (userDetails) {
+            userName.innerText = `${userDetails.firstName} ${userDetails.lastName}`;
+        } else {
+            userName.innerText = 'Guest';
+        }
+    };
+
+    const loadAccounts = () => {
+        if (!token) {
+            showError('User not authenticated. Please login.');
+            return;
+        }
+
+        const url = 'http://127.0.0.1:8000/api/v2/account';
+
+        fetch(url, options)
+            .then(res => res.json())
+            .then((response) => {
+                if (response.status === 200 && response.data.length) {
+                    const depositAccountSelect = document.getElementById('depositAccountSelect');
+                    let accountTableHTML = `
+              <table class="stats-table">
+                <thead>
+                  <tr>
+                    <th>Account Number</th>
+                    <th>Type</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+                    let accountOptionsHTML = '<option value="" disabled selected>-- Select an Account --</option>';
+
+                    response.data.forEach((account) => {
+                        accountTableHTML += `
+                <tr>
+                  <td>${account.account_number}</td>
+                  <td>${account.account_type}</td>
+                  <td>${parseFloat(account.balance).toFixed(2)}</td>
+                  <td><button type="button" class="btn btn-primary" onclick="loadTransactionDetails('${account.account_number}')">View</button></td>
+                </tr>
+              `;
+                        accountOptionsHTML += `
+                <option value="${account.account_number}">
+                    ${account.account_type} - ${account.account_number} (Balance: ${parseFloat(account.balance).toFixed(2)})
+                </option>
+              `;
+                    });
+
+                    accountTableHTML += `
+                </tbody>
+              </table>
+            `;
+
+                    accountsTabContent.innerHTML = accountTableHTML;
+                    depositAccountSelect.innerHTML = accountOptionsHTML;
+
+                } else if (response.status === 404) {
+                    accountsTabContent.innerText = 'No Account found, Click on Create account to create a new bank account';
+                    accountsTabContent.style.color = 'purple';
+                } else {
+                    showError(response.message || 'Unable to load accounts.');
+                }
+            })
+            .catch((error) => {
+                showError(error.message || 'Error connecting. Check your internet connection.');
+            });
+    };
+
+    // NEW: Function to load and display transaction history
+    const loadTransactions = () => {
+        if (!token) return;
+
+        const url = 'http://127.0.0.1:8000/api/v2/transactions'; // Assumed endpoint for transactions
+
+        fetch(url, options)
+            .then(res => res.json())
+            .then(response => {
+                transactionHistoryDiv.innerHTML = ''; // Clear previous history
+                if (response.status === 200 && response.data.length) {
+                    let transactionRows = `
+                    <table id="transaction-table" class="stats-table">
+                        <tr>
+                            <th>Date</th>
+                            <th>Account Number</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Old Balance</th>
+                            <th>New Balance</th>
+                        </tr>
+                `;
+                    response.data.forEach(tx => {
+                        const transactionDate = new Date(tx.created_on).toLocaleString('en-GB');
+                        transactionRows += `
+                        <tr>
+                            <td>${transactionDate}</td>
+                            <td>${tx.account_number}</td>
+                            <td class="${tx.transaction_type.toLowerCase()}">${tx.transaction_type}</td>
+                            <td>${parseFloat(tx.amount).toFixed(2)}</td>
+                            <td>${parseFloat(tx.old_balance).toFixed(2)}</td>
+                            <td>${parseFloat(tx.new_balance).toFixed(2)}</td>
+                        </tr>
+                    `;
+                    });
+                    transactionRows += '</table>';
+                    transactionHistoryDiv.innerHTML = transactionRows;
+                } else {
+                    transactionHistoryDiv.innerHTML = '<p>No transaction history found.</p>';
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load transactions:', err);
+                transactionHistoryDiv.innerHTML = '<p>Could not load transaction history.</p>';
+            });
+    };
+
+
+    function loadTransactionDetails(accountNumber) {
+        alert('Load transactions for account: ' + accountNumber);
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+    }
+
+    function closeModal(modalId) {
+        if (modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        } else {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+    }
+
+    // MODIFIED: Fully implemented deposit function
+    function submitDeposit(event) {
+        event.preventDefault();
+        const amount = document.getElementById('depositAmount').value;
+        const selectedAccount = document.getElementById('depositAccountSelect').value;
+
+        if (!selectedAccount) {
+            showError('Please select an account.');
+            return;
+        }
+
+        const url = `http://127.0.0.1:8000/api/v2/transactions/${selectedAccount}/credit/`;
+
+        const depositOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                amount: parseFloat(amount)
+            })
+        };
+
+        fetch(url, depositOptions)
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === 200) {
+                    alert('Deposit successful! ');
+                    closeModal('depositModal');
+                    document.getElementById('depositForm').reset(); // Reset form fields
+
+                    // Refresh data on the page
+                    loadAccounts();
+                    loadTransactions();
+                } else {
+                    showError(response.error || 'Deposit failed.');
+                }
+            })
+            .catch(error => {
+                console.error('Deposit Error:', error);
+                showError('An error occurred. Please check your connection.');
+            });
+    }
+
+    function submitWithdraw(event) {
+        event.preventDefault();
+        const amount = document.getElementById('withdrawAmount').value;
+        alert(`Withdraw ${amount}`);
+        closeModal('withdrawModal');
+    }
+
+    function submitTransfer(event) {
+        event.preventDefault();
+        const recipientAccount = document.getElementById('transferAccount').value;
+        const amount = document.getElementById('transferAmount').value;
+        alert(`Transfer ${amount} to account ${recipientAccount}`);
+        closeModal('transferModal');
+    }
+
+    // MODIFIED: Call loadTransactions on page load
+    window.onload = () => {
+        loadProfileDetails();
+        loadAccounts();
+        loadTransactions(); // Load history when the page opens
+    };
+</script>
+-->
+

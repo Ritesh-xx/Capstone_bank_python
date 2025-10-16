@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>
+        Banka - Staff Dashboard
+    </title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" />
+    <script src="assets/js/auth-guard.js" defer></script>
+</head>
+
+<body onload="loadAllAccounts(), loadAdminProfile()">
+    <div class="modal-toggle"></div>
+    <!-- Begin Header -->
+    <header>
+        <nav class="navbar">
+                <a href="../templates/index.html" class="navbar-logo">Banka</a>
+            <button class="hamburger-menu"><a class="hamburger"></a></button>
+            <ul class="navbar-menu">
+                <li class="navbar-link"><a href="credit-debit-user.html">Credit/Debit User</a</li>
+                <li class="navbar-link"><a href="../templates/index.html">Log Out</a></li>
+            </ul>
+        </nav>
+    </header>
+    <!-- End Header -->
+    <!-- Begin Main Section -->
+    <main>
+            <section class="container form-container">
+                <div class="profile">
+                    <div class="card profile-card">
+                        <!-- Copied and edited from https://www.w3schools.com/howto/howto_css_image_overlay.asp -->
+                            <div class="profile-picture">
+                                    <img src="" id="img-preview" alt="Click to upload profile picture" class="image" style="width:100%">
+                                    <div class="middle">
+                                         <!-- copied and edited from http://jsfiddle.net/a4Jtz/6/ -->
+                                      <li class="upload">
+                                            <form>
+                                         <div class="fupload">
+                                            click to upload
+                                         </div>
+                                         <input type="file" name="upload" id="rupload" class="rupload" />
+                                        </form>
+                                        </li>
+                                    </div>
+                                  </div>
+                                  <p class="profile-name"><h2 id="user-name"></h2></p>
+                                  <table class="profile-tab">
+                                        <tr>
+                                                <td>Role: &nbsp;</td>
+                                                <td id="role"></td> 
+                                              </tr>
+                            </table>
+                                </div>
+                                <div class="profile-table">
+                                        <h2 class="section-title">Clients Account Details</h2>
+                                        <div class="errors">
+                                                <ul>
+                              
+                                                </ul>
+                                              </div>
+                                    <div id="all-accounts" class="stats-table">
+                                        <table>
+                                            <td><button id="activate-deactivate"></button></td>
+                                        </table>
+                                    </div>
+                                </div>
+                </div>
+                <!-- Modal Section -->
+    
+                 <!-- The Modal -->
+    
+            <div id="deleteModal" class="modal">
+                    <!-- Modal content -->
+                    <div class="modal-content">
+                        <span class="close-modal" onclick="closeDeleteModal()">&times;</span>
+                        <div>
+    
+        <div class="account-delete" id="delete">
+                <div class="errorss">
+                        <ul>
+        
+                        </ul>
+                      </div>
+            <div class="modal-header"><h1>Delete Account</h1></div>
+            <div>
+                <h3 class="modal-message">Are You Sure You Want To Delete This Account?</h3>
+                <div class="modal-group">
+                <button id="confirm" value="" class="btn-submit">Delete</button>
+                <button onclick="window.location='admin-dashboard.html';" value="" class="btn-remove">Cancel</button>
+                </div>
+                <br>
+            </div>
+        </div>
+        </div>
+        </div>
+        </div>
+            </section>
+        </main>
+    <!-- End Main Section -->
+    <!-- Begin Footer -->
+    <footer>
+        <p class="credits">Banka | Copyright &copy; Andela 2019</p>
+    </footer>
+    <!-- End Footer -->
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/admin.js"></script>
+    <script src="assets/js/transactions.js"></script>
+    <script src="assets/js/image.js"></script>
+    <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>  
+</body>
+
+</html>
