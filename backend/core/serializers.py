@@ -91,39 +91,38 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 from rest_framework import serializers
-from .models import Account
+from .models import Account, Transaction
+
+
+# In serializers.py
 
 
 class AccountSerializer(serializers.ModelSerializer):
-    # This is a write-only field (not part of the model, just input from the user)
+    # This custom field is for input only and is correct.
     openingBalance = serializers.DecimalField(
         max_digits=15, decimal_places=2, write_only=True, required=True, min_value=0
     )
 
-    account_type = serializers.ChoiceField(choices=Account.ACCOUNT_TYPES)
-
-    def create(self, validated_data):
-        if 'account_number' not in validated_data:
-            validated_data['account_number'] = ''.join(random.choices(string.digits, k=10))
-        # rest of create code here
-        opening_balance = validated_data.pop('openingBalance', None)
-        owner = self.context['request'].user
-        account = Account.objects.create(owner=owner, balance=opening_balance, **validated_data)
-        return account
-
     class Meta:
         model = Account
+        # Use the Django model field 'owner', not the database column 'owner_id'.
         fields = ['id', 'owner', 'account_type', 'balance', 'created_on', 'openingBalance', 'account_number']
+        
+        # ✅ THE FIX: 'owner' is made read-only. This tells the serializer
+        # to ignore 'owner' from the request body, preventing the conflict.
         read_only_fields = ['id', 'owner', 'balance', 'created_on', 'account_number']
 
     def create(self, validated_data):
+        # Pop the custom 'openingBalance' field before creating the model instance.
         opening_balance = validated_data.pop('openingBalance', None)
-        owner = self.context['request'].user
+        
+        # The 'owner' is already in validated_data because the view's 
+        # perform_create method adds it securely. We don't need to get it again.
 
+        # Create the account, setting the balance from our custom field.
         account = Account.objects.create(
-            owner=owner,
             balance=opening_balance,
-            **validated_data
+            **validated_data  # This now works because 'owner' is only passed once inside here.
         )
         return account
 
