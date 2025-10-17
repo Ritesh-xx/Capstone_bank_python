@@ -78,15 +78,19 @@ class AccountTransactionListView(APIView):
     permission_classes = [IsAuthenticated]  # Good practice to add permissions
 
     def get(self, request, account_number):
-        # Use the account_number to filter transactions via the foreign key relationship
-        transactions = Transaction.objects.filter(account__account_number=account_number)
-        serializer = TransactionSerializer(transactions, many=True)
+        # ✅ STEP 1: Securely get the account.
+        # This will ONLY find the account if the account_number matches AND
+        # the owner is the person making the request.
+        # If it's not found, it automatically returns a 404 Not Found error.
+        account = get_object_or_404(Account, account_number=account_number, owner=request.user)
 
-        if transactions.exists():
-            return Response({'status': 200, 'data': serializer.data})
-        else:
-            # Send a 200 OK with an empty list, which is standard for "found the account, but no transactions"
-            return Response({'status': 200, 'data': []})
+        # ✅ STEP 2: Now that we have the secure account, get its transactions.
+        transactions = Transaction.objects.filter(account=account).order_by('-created_on')
+
+        # ✅ STEP 3: Serialize and return the data.
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response({'status': 200, 'data': serializer.data})
+    
 
 def home(request):
     return render(request, 'index.html')

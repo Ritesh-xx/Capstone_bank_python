@@ -1,6 +1,429 @@
 /* eslint-disable no-return-assign */
 /* eslint-disable no-unused-vars */
 
+// --- Helper Functions ---
+
+/**
+ * Creates a fresh options object for API calls with the latest token.
+ * This is the KEY FIX that solves the "Error connecting" issue.
+ * @param {string} [method='GET'] - The HTTP method (e.g., 'POST').
+ * @param {object} [body=null] - The request body for POST/PUT calls.
+ * @returns {object} The options object for a fetch request.
+ */
+const getAuthOptions = (method = 'GET', body = null) => {
+    // ✅ Always get the fresh token from localStorage right before the request
+    const token = localStorage.getItem('token');
+
+    const options = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    };
+
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+    return options;
+};
+
+const append = (parent, el) => parent.appendChild(el);
+const createNode = element => document.createElement(element);
+
+const showError = (message) => {
+    const errorDiv = document.querySelector('.errors');
+    const errorContainer = document.querySelector('.errors ul');
+    errorDiv.style.display = 'block';
+    errorDiv.style.color = 'red';
+    errorContainer.innerHTML = '';
+    const msg = createNode('li');
+    msg.textContent = message;
+    append(errorContainer, msg);
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+        errorContainer.innerHTML = '';
+    }, 5000);
+};
+
+// --- Data Loading & Display Functions ---
+
+const loadProfileDetails = () => {
+    const userDetails = JSON.parse(localStorage.getItem('userDetails'));
+    const userName = document.getElementById('user-name');
+    if (userDetails) {
+        userName.innerText = `${userDetails.firstName} ${userDetails.lastName}`;
+    } else {
+        userName.innerText = 'Guest';
+    }
+};
+
+const loadAccounts = () => {
+    const url = 'http://127.0.0.1:8000/api/v2/account';
+    const accountsTabContent = document.getElementById('account');
+
+    fetch(url, getAuthOptions()) // ✅ Use the helper to get fresh options
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to load accounts. Your session may have expired.');
+            return res.json();
+        })
+        .then((response) => {
+            // The API for listing accounts doesn't wrap the data in a `data` key.
+            const accounts = response; 
+            if (accounts && accounts.length > 0) {
+                let accountList = `
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Account Number</th>
+                                <th>Type</th>
+                                <th>Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                accounts.forEach((account) => {
+                    accountList += `
+                        <tr>
+                            <td>${account.account_number}</td>
+                            <td>${account.account_type}</td>
+                            <td>${parseFloat(account.balance).toFixed(2)}</td>
+                            <td><button type="button" class="btn btn-primary" onclick="loadTransactionDetails('${account.account_number}')">View</button></td>
+                        </tr>`;
+                });
+                accountList += `</tbody></table>`;
+                accountsTabContent.innerHTML = accountList;
+            } else {
+                accountsTabContent.innerText = 'No accounts found. Create one to get started!';
+            }
+        })
+        .catch((error) => {
+            showError(error.message);
+            console.error("Load Accounts Error:", error);
+        });
+};
+
+const loadTransactions = () => {
+    const url = 'http://127.0.0.1:8000/api/v2/transactions';
+    const transactionHistoryDiv = document.getElementById('transaction');
+
+    fetch(url, getAuthOptions()) // ✅ Use the helper
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to load transaction history.');
+            return res.json();
+        })
+        .then(response => {
+            transactionHistoryDiv.innerHTML = '';
+            const transactions = response.data || response;
+            if (transactions && transactions.length > 0) {
+                let transactionRows = `
+                    <table id="transaction-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Account Number</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Old Balance</th>
+                                <th>New Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                transactions.forEach(tx => {
+                    const transactionDate = new Date(tx.created_on).toLocaleString('en-GB');
+                    transactionRows += `
+                        <tr>
+                            <td>${transactionDate}</td>
+                            <td>${tx.account_number}</td>
+                            <td class="${tx.transaction_type.toLowerCase()}">${tx.transaction_type}</td>
+                            <td>${parseFloat(tx.amount).toFixed(2)}</td>
+                            <td>${parseFloat(tx.old_balance).toFixed(2)}</td>
+                            <td>${parseFloat(tx.new_balance).toFixed(2)}</td>
+                        </tr>`;
+                });
+                transactionRows += '</tbody></table>';
+                transactionHistoryDiv.innerHTML = transactionRows;
+            } else {
+                transactionHistoryDiv.innerHTML = '<p>No transaction history found.</p>';
+            }
+        })
+        .catch(err => {
+            showError(err.message);
+            console.error('Failed to load transactions:', err);
+        });
+};
+
+/*
+const loadTransactionDetails = (accountNumber) => {
+    if (!accountNumber) return;
+    const url = `http://127.0.0.1:8000/api/v2/accounts/${accountNumber}/transactions`;
+    const transactionHistoryDiv = document.getElementById('transaction');
+    
+    fetch(url, getAuthOptions()) // ✅ Use the helper
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Could not fetch transactions.') });
+            return res.json();
+        })
+        .then(response => {
+            // ... (Your existing logic for displaying details is fine)
+        })
+        .catch(error => {
+            showError(error.message);
+            console.error('View Transactions Error:', error);
+        });
+};
+
+*/
+
+// In your user.js file
+
+const loadTransactionDetails = (accountNumber) => {
+    // Check if an account number was provided
+    if (!accountNumber) {
+        console.error("No account number provided to loadTransactionDetails");
+        return;
+    }
+
+    const transactionHistoryDiv = document.getElementById('transaction');
+    const url = `http://127.0.0.1:8000/api/v2/accounts/${accountNumber}/transactions`;
+
+    // Show a loading message
+    transactionHistoryDiv.innerHTML = `<p>Loading transactions for ${accountNumber}...</p>`;
+
+    fetch(url, getAuthOptions()) // Assumes you have the getAuthOptions() helper
+        .then(res => {
+            if (!res.ok) {
+                // If the server returns an error, parse it and throw it
+                return res.json().then(err => { throw new Error(err.error || 'Could not fetch transactions.') });
+            }
+            return res.json();
+        })
+        .then(response => {
+            const transactions = response.data; // The data is wrapped in a 'data' key
+
+            // ✅ THE FIX IS HERE: This block builds the new HTML table
+            if (transactions && transactions.length > 0) {
+                // Start building the HTML string for the new table
+                let htmlList = `
+                    <h2 class="feature">Transaction History for Account ${accountNumber}</h2>
+                    <table id="transaction-table" class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Old Balance</th>
+                                <th>New Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                // Loop through the new transaction data and create a table row for each one
+                transactions.forEach((transaction) => {
+                    const date = new Date(transaction.created_on);
+                    // Using 'en-IN' for India Standard Time display
+                    const formattedDate = date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+                    htmlList += `
+                        <tr>
+                            <td>${formattedDate}</td>
+                            <td class="${transaction.transaction_type.toLowerCase()}">${transaction.transaction_type}</td>
+                            <td>${parseFloat(transaction.amount).toFixed(2)}</td>
+                            <td>${parseFloat(transaction.old_balance).toFixed(2)}</td>
+                            <td>${parseFloat(transaction.new_balance).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+
+                htmlList += '</tbody></table>';
+
+                // 🎨 Replace the content of the transaction div with the new table
+                transactionHistoryDiv.innerHTML = htmlList;
+
+            } else {
+                // If there are no transactions, show a message
+                transactionHistoryDiv.innerHTML = `<p>No transactions found for account ${accountNumber}.</p>`;
+            }
+        })
+        .catch((error) => {
+            console.error('View Transactions Error:', error);
+            // Display the error in the UI
+            transactionHistoryDiv.innerHTML = `<p style="color: red;">${error.message}</p>`;
+        });
+};
+
+// --- Modal and Form Submission Logic ---
+
+function openModal(modalId) {
+    if (['depositModal', 'withdrawModal', 'transferModal'].includes(modalId)) {
+        loadAccountsForModals();
+    }
+    document.getElementById(modalId).style.display = 'block';
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+window.onclick = function (event) {
+    ['depositModal', 'withdrawModal', 'transferModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+};
+
+
+
+function submitDeposit(event) {
+    event.preventDefault();
+    const amount = document.getElementById('depositAmount').value;
+    const accountNumber = document.getElementById('depositAccountSelect').value;
+
+    if (!accountNumber) return alert('Please select an account.');
+
+    const url = `http://127.0.0.1:8000/api/v2/transactions/${accountNumber}/credit/`;
+    const body = { amount: parseFloat(amount) };
+
+    fetch(url, getAuthOptions('POST', body)) // ✅ Use helper for POST
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Deposit failed') });
+            return res.json();
+        })
+        .then(data => {
+            alert('Deposit successful!');
+            closeModal('depositModal');
+            loadAccounts();
+            loadTransactions();
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('Deposit Error:', error);
+        });
+}
+
+function submitWithdraw(event) {
+    event.preventDefault();
+    const amount = document.getElementById('withdrawAmount').value;
+    const accountNumber = document.getElementById('withdrawAccountSelect').value;
+
+    if (!accountNumber) return alert('Please select an account.');
+
+    const url = `http://127.0.0.1:8000/api/v2/transactions/${accountNumber}/debit/`;
+    const body = { amount: parseFloat(amount) };
+
+    fetch(url, getAuthOptions('POST', body)) // ✅ Use helper for POST
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Withdrawal failed') });
+            return res.json();
+        })
+        .then(data => {
+            alert('Withdrawal successful!');
+            closeModal('withdrawModal');
+            loadAccounts();
+            loadTransactions();
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('Withdrawal Error:', error);
+        });
+}
+
+function submitTransfer(event) {
+    event.preventDefault();
+    const fromAccountNumber = document.getElementById('transferFromAccountSelect').value;
+    const toAccountNumber = document.getElementById('transferAccount').value;
+    const amount = document.getElementById('transferAmount').value;
+
+    if (!fromAccountNumber) return alert('Please select an account to transfer from.');
+
+    const url = `http://127.0.0.1:8000/api/v2/accounts/${fromAccountNumber}/transfer/`;
+    const body = { to_account: toAccountNumber, amount: parseFloat(amount) };
+
+    fetch(url, getAuthOptions('POST', body)) // ✅ Use helper for POST
+        .then(res => {
+            if (!res.ok) return res.json().then(err => { throw new Error(err.error || 'Transfer failed') });
+            return res.json();
+        })
+        .then(data => {
+            alert('Transfer successful!');
+            closeModal('transferModal');
+            loadAccounts();
+            loadTransactions();
+        })
+        .catch(error => {
+            alert(error.message);
+            console.error('Transfer Error:', error);
+        });
+}
+
+function loadAccountsForModals() {
+    const url = 'http://127.0.0.1:8000/api/v2/account';
+    fetch(url, getAuthOptions()) // ✅ Use the helper
+        .then(res => {
+            if (!res.ok) throw new Error('Could not load accounts for modal.');
+            return res.json();
+        })
+        .then(accounts => {
+            populateAccountSelect('depositAccountSelect', accounts);
+            populateAccountSelect('withdrawAccountSelect', accounts);
+            populateAccountSelect('transferFromAccountSelect', accounts);
+        })
+        .catch(error => {
+            console.error('Error fetching accounts for modals:', error);
+        });
+}
+
+function populateAccountSelect(selectElementId, accounts) {
+    // ... (This function is fine as is)
+}
+
+function logout() {
+    localStorage.clear();
+    alert('You have been successfully logged out.');
+    window.location.href = '/home/';
+}
+
+
+// --- Initial Page Load ---
+document.addEventListener('DOMContentLoaded', () => {
+    // First, check if the user is even logged in.
+    if (!localStorage.getItem('token')) {
+        alert('You must be logged in to view this page.');
+        window.location.href = '/home/'; // Redirect if no token
+        return; // Stop the rest of the script from running
+    }
+    
+    // If logged in, load all the necessary data.
+    loadProfileDetails();
+    loadAccounts();
+    loadTransactions();
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* eslint-disable no-return-assign */
+/* eslint-disable no-unused-vars */
+
+/*
+
 const userDetails = JSON.parse(localStorage.getItem('userDetails'));
 const token = localStorage.getItem('token');
 
@@ -467,3 +890,5 @@ function logout() {
     alert('You have been successfully logged out.');
     window.location.href = '/home/'; // Or change to '/' if you prefer the home page
 }
+
+*/

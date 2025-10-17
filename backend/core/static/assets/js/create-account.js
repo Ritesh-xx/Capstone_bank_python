@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable consistent-return */
-const url = 'http://127.0.0.1:8000/api/v2/accounts';
-// const url = 'https://bankaapp.herokuapp.com/api/v2/accounts';
+const url = 'http://127.0.0.1:8000/api/v2/account';
+
 const token = localStorage.getItem('token');
 
 const accountTypeRegex = /(current|savings)$/i;
