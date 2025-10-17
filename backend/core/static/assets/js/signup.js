@@ -95,7 +95,7 @@ signUpForm.addEventListener('submit', async (e) => {
       localStorage.setItem('loggedIn', 'true');
 
       setTimeout(() => {
-        window.location = './user-dashboard.html';
+        window.location = './signin.html';
       }, 3000);
 
     } else if (res.status === 409) {

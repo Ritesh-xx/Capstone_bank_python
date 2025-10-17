@@ -15,7 +15,9 @@
         '/',                // Homepage
         '/index.html',      // Homepage alias
         '/signin/',         // Sign-in page
-        '/signup/'          // Sign-up page
+        '/signup/',
+        '/static/signin.html',    
+        '/static/signup.html'         
     ];
 
     // Check if the current page is a protected page
@@ -27,7 +29,7 @@
     if (isProtectedPage && !token) {
         // ...redirect them to the sign-in page.
         alert('You must be logged in to view this page.');
-        window.location.href = '/home/'; 
+        window.location.href = '/static/signin.html'; 
     }
 
     // 2. (Optional but recommended) If the user IS logged in BUT tries to visit sign-in/sign-up...

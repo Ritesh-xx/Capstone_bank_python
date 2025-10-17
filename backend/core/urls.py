@@ -21,17 +21,18 @@ urlpatterns = [
     path('auth/signin', SignInView.as_view(), name='signin'),
     path('api/v2/auth/signin', SignInView.as_view(), name='signin'),
 
-    path('accounts', AccountListCreateView.as_view(), name='accounts'),
+    path('api/v2/account', AccountListCreateView.as_view(), name='accounts'),
     path('accounts/<int:pk>', AccountDetailView.as_view(), name='account-detail'),
 
     path('transactions', TransactionListCreateView.as_view(), name='transactions'),
+    # path('api/v2/transactions', TransactionListCreateView.as_view(), name='api-transactions'),
     path('api/v2/accounts/<str:account_number>/transactions', AccountTransactionListView.as_view(), name='account-transactions'),
 
 
 
     path('user/profile', UserProfileView.as_view(), name='user-profile'),
-    path('api/v2/accounts', CreateAccountView.as_view(), name='create-account'),
-    path('api/v2/account', UserAccountsView.as_view(), name='user-accounts'),
+    # path('api/v2/account', CreateAccountView.as_view(), name='create-account'),
+    # path('api/v2/account', UserAccountsView.as_view(), name='user-accounts'),
 
     path('api/v2/transactions/<str:account_number>/credit/', deposit, name='deposit_money'),
     path('api/v2/transactions/<str:account_number>/debit/', withdraw_money, name='withdraw_money'),
