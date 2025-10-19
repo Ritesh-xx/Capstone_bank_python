@@ -14,8 +14,8 @@
     const publicPages = [
         '/',                // Homepage
         '/index.html',      // Homepage alias
-        '/signin/',         // Sign-in page
-        '/signup/'          // Sign-up page
+        '/static/signup.html',         // Sign-up page
+        '/static/signin.html'          // Sign-in page
     ];
 
     // Check if the current page is a protected page

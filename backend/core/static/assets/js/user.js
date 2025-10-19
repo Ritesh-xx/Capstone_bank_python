@@ -46,9 +46,12 @@ const loadProfileDetails = () => {
 const loadAccounts = () => {
     const url = 'http://127.0.0.1:8000/api/v2/account';
 
+    console.log('Loading accounts with token:', token); // Debug log
+
     fetch(url, options)
         .then(res => res.json())
         .then((response) => {
+            console.log('Accounts loaded:', response);
             if (response.status === 200 && response.data.length) {
                 let accountList = `
           <table class="stats-table">
