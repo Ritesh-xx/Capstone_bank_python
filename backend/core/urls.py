@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/v2/transactions/<str:account_number>/credit/', deposit, name='deposit_money'),
     path('api/v2/transactions/<str:account_number>/debit/', withdraw_money, name='withdraw_money'),
     path('api/v2/accounts/<str:from_account_number>/transfer/', transfer_money, name='transfer_money'),
+    path('account/<str:account_number>/', AccountDetailView.as_view(), name='account-detail'),
 
     # ... you might also want to add your other views
     # path('transactions/', TransactionListCreateView.as_view(), name='list_transactions'),
