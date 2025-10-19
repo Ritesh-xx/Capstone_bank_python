@@ -95,32 +95,36 @@ signUpForm.addEventListener('submit', async (e) => {
       localStorage.setItem('loggedIn', 'true');
 
       setTimeout(() => {
-        window.location = './user-dashboard.html';
+        window.location = './signin.html';
       }, 3000);
 
-    } else if (res.status === 409) {
-      errorDiv.style.color = 'red';
-      const li = createNode('li');
-      li.innerHTML = data.message || 'Email already exists. Please specify a new email.';
-      append(errorContainer, li);
-
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-        errorContainer.innerHTML = '';
-      }, 5000);
-
-    } else {
-      // Handle other errors
-      errorDiv.style.color = 'red';
-      const li = createNode('li');
-      li.innerHTML = data.message || 'An error occurred. Please try again.';
-      append(errorContainer, li);
-
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-        errorContainer.innerHTML = '';
-      }, 5000);
     }
+    else {
+ // Handle non-201 status codes (409, 400, 500, etc.)
+    errorDiv.style.color = 'red';
+    const li = createNode('li');
+
+    let errorMessage = data.message || 'An error occurred. Please try again.';
+
+      // *** ADDED: Specific check for the nested 'email' error object ***
+      // If the server response is like {"email": ["user with this email already exists."]}
+    if (data.email && Array.isArray(data.email) && data.email.length > 0) {
+          // Use the first error message from the email array
+          errorMessage = data.email[0];
+    } else if (data.message) {
+          // Use the top-level 'message' if it exists
+          errorMessage = data.message;
+    }
+      // *** END ADDED ***
+
+    li.innerHTML = errorMessage;
+    append(errorContainer, li);
+
+    setTimeout(() => {
+      errorDiv.style.display = 'none';
+      errorContainer.innerHTML = '';
+      }, 5000);
+  }
 
   } catch (error) {
     errorDiv.style.display = 'block';
