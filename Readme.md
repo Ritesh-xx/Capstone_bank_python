@@ -108,3 +108,4 @@ The application exposes the following API endpoints under the `/api/v2/` prefix.
 | `POST` | `/transactions/<account_number>/credit/`                 | Deposit money into an account.             |
 | `POST` | `/transactions/<account_number>/debit/`                  | Withdraw money from an account.            |
 | `POST` | `/accounts/<from_account_number>/transfer/`              | Transfer money between two accounts.       |
+
