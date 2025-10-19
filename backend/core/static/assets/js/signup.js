@@ -100,22 +100,20 @@ signUpForm.addEventListener('submit', async (e) => {
 
     }
     else {
- // Handle non-201 status codes (409, 400, 500, etc.)
+    // Handle non-201 status codes (409, 400, 500, etc.)
     errorDiv.style.color = 'red';
     const li = createNode('li');
 
-    let errorMessage = data.message || 'An error occurred. Please try again.';
-
-      // *** ADDED: Specific check for the nested 'email' error object ***
-      // If the server response is like {"email": ["user with this email already exists."]}
+    let errorMessage;
     if (data.email && Array.isArray(data.email) && data.email.length > 0) {
-          // Use the first error message from the email array
-          errorMessage = data.email[0];
+      errorMessage = data.email[0];
+
     } else if (data.message) {
-          // Use the top-level 'message' if it exists
-          errorMessage = data.message;
+      errorMessage = data.message;
+    } else {
+      errorMessage = 'An unknown error occurred. Please try again.';
     }
-      // *** END ADDED ***
+   
 
     li.innerHTML = errorMessage;
     append(errorContainer, li);
