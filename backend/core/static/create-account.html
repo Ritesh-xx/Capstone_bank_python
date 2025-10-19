@@ -13,12 +13,12 @@
     <!-- Begin Header -->
     <header>
             <nav class="navbar">
-                    <a href="../../../Banka/UI" class="navbar-logo">Banka</a>
+                    <a href="/home/" class="navbar-logo">Banka</a>
                     <button class="hamburger-menu"><a class="hamburger"></a></button>
                     <ul class="navbar-menu">
-                        <li class="navbar-link"><a href="../templates/index.html">Home</a></li>
+                        <li class="navbar-link"><a href="./user-dashboard.html">Home</a></li>
                         <li class="navbar-link"><a href="user-dashboard.html">My Profile</a></li>
-                        <li class="navbar-link"><a href="../templates/index.html">Log Out</a></li>
+                        <li class="navbar-link"><a href="#" onclick="logout()">Log Out</a></li>
                     </ul>
                 </nav>
 
@@ -67,6 +67,19 @@
     <!-- End Footer -->
     <script src="assets/js/main.js"></script>
     <script src="assets/js/create-account.js"></script>
+
+    <script>
+      function logout() {
+    // Clear the stored token and user details
+    localStorage.removeItem('token');
+    localStorage.removeItem('userDetails');
+    localStorage.removeItem('loggedIn');
+
+    // Redirect to the sign-in page
+    alert('You have been successfully logged out.');
+    window.location.href = '/home/'; // Or change to '/' if you prefer the home page
+}
+    </script>
 </body>
 
 </html>
