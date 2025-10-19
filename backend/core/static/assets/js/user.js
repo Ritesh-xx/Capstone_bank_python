@@ -60,7 +60,7 @@ const loadAccounts = () => {
                 <th>Account Number</th>
                 <th>Type</th>
                 <th>Balance</th>
-                <th>Actions</th>
+                <th colspan="2">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -74,7 +74,8 @@ const loadAccounts = () => {
               <td>${account.account_type}</td>
               <td>${parseFloat(account.balance).toFixed(2)}</td>
               <td><button type="button" class="btn btn-primary" onclick="loadTransactionDetails('${account.account_number}')">View</button></td>
-            </tr>
+              <td><button type="button" class="btn btn-danger" onclick="closeAccount('${account.account_number}')">Close</button></td>
+              </tr>
           `;
                 });
                 accountList += `</tbody></table>`;
@@ -469,4 +470,46 @@ function logout() {
     // Redirect to the sign-in page
     alert('You have been successfully logged out.');
     window.location.href = '/home/'; // Or change to '/' if you prefer the home page
+}
+
+function closeAccount(accountNumber) {
+    // 1. Confirm the action with the user
+    if (!confirm('Are you sure you want to close this account? This action cannot be undone.')) {
+        return; // Stop if the user clicks "Cancel"
+    }
+
+    const url = `http://127.0.0.1:8000/api/v2/account/${accountNumber}/`;
+
+    const deleteOptions = {
+        method: 'DELETE', // Use the DELETE HTTP method
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+    };
+
+    fetch(url, deleteOptions)
+        .then(res => {
+            // Check if the response is OK (status 200-299)
+            // A successful DELETE might not return a JSON body, so we check status first
+            if (res.status === 200 || res.status === 204) {
+                return { status: res.status, message: 'Account closed successfully!' };
+            }
+            return res.json(); // Otherwise, parse the JSON error response
+        })
+        .then(response => {
+            // 2. Handle the response
+            if (response.status === 200 || response.status === 204) {
+                alert(response.message);
+                // 3. Refresh the UI to reflect the change
+                loadAccounts();
+                loadTransactions();
+            } else {
+                showError(response.error || 'Failed to close the account.');
+            }
+        })
+        .catch(error => {
+            console.error('Close Account Error:', error);
+            showError('An error occurred. Please check your connection.');
+        });
 }

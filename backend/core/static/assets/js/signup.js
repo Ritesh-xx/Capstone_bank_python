@@ -1,5 +1,3 @@
-/* eslint-disable no-useless-escape */
-/* eslint-disable consistent-return */
 
 const url = 'http://127.0.0.1:8000/api/v2/auth/signup';
 
@@ -95,32 +93,34 @@ signUpForm.addEventListener('submit', async (e) => {
       localStorage.setItem('loggedIn', 'true');
 
       setTimeout(() => {
-        window.location = './user-dashboard.html';
+        window.location = './signin.html';
       }, 3000);
 
-    } else if (res.status === 409) {
-      errorDiv.style.color = 'red';
-      const li = createNode('li');
-      li.innerHTML = data.message || 'Email already exists. Please specify a new email.';
-      append(errorContainer, li);
-
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-        errorContainer.innerHTML = '';
-      }, 5000);
-
-    } else {
-      // Handle other errors
-      errorDiv.style.color = 'red';
-      const li = createNode('li');
-      li.innerHTML = data.message || 'An error occurred. Please try again.';
-      append(errorContainer, li);
-
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-        errorContainer.innerHTML = '';
-      }, 5000);
     }
+    else {
+    // Handle non-201 status codes (409, 400, 500, etc.)
+    errorDiv.style.color = 'red';
+    const li = createNode('li');
+
+    let errorMessage;
+    if (data.email && Array.isArray(data.email) && data.email.length > 0) {
+      errorMessage = data.email[0];
+
+    } else if (data.message) {
+      errorMessage = data.message;
+    } else {
+      errorMessage = 'An unknown error occurred. Please try again.';
+    }
+   
+
+    li.innerHTML = errorMessage;
+    append(errorContainer, li);
+
+    setTimeout(() => {
+      errorDiv.style.display = 'none';
+      errorContainer.innerHTML = '';
+      }, 5000);
+  }
 
   } catch (error) {
     errorDiv.style.display = 'block';

@@ -369,3 +369,37 @@ def transfer_money(request, from_account_number):
         'status': 200,
         'message': 'Transfer successful',
     }, status=status.HTTP_200_OK)
+
+class AccountDetailView(APIView):
+    """
+    View to retrieve, update or delete a user's account instance.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self, account_number, user):
+        """Helper method to get the account object if it belongs to the user."""
+        try:
+            # CORRECTED: Use 'owner' instead of 'user' to match your model's field name
+            return Account.objects.get(account_number=account_number, owner=user)
+        except Account.DoesNotExist:
+            return None
+
+    def delete(self, request, account_number, format=None):
+        """
+        Handle DELETE request to close/delete an account.
+        """
+        account = self.get_object(account_number, request.user)
+
+        if account is None:
+            return Response({
+                "error": "Account not found or you do not have permission to access it."
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if account.balance > 0:
+            return Response({
+                "error": "Cannot close an account with a positive balance. Please withdraw all funds first."
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        account.delete()
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -32,10 +32,11 @@ signInForm.addEventListener('submit', async (e) => {
 });
 
     const response = await res.json();
+    console.log('Sign-in response:', response);
 
     errorDiv.style.display = 'block';
 
-    if (res.status === 400) {
+    if (res.status === 400 || res.status === 401) {
       errorDiv.style.color = 'red';
       const li = createNode('li');
       li.innerHTML = response.message || 'Invalid credentials, please try again.';
@@ -71,14 +72,6 @@ signInForm.addEventListener('submit', async (e) => {
       return;
     }
 
-    errorDiv.style.color = 'red';
-    const li = createNode('li');
-    li.innerHTML = response.message || 'An error occurred, please try again.';
-    append(errorContainer, li);
-    setTimeout(() => {
-      errorDiv.style.display = 'none';
-      errorContainer.innerHTML = '';
-    }, 5000);
 
   } catch (error) {
     errorDiv.style.display = 'block';
