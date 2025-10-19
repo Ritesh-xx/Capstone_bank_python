@@ -35,7 +35,7 @@ class SignInView(TokenObtainPairView):
 # Account creation & listing
 class AccountListCreateView(generics.ListCreateAPIView):
     serializer_class = AccountSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated] 
 
     def get_queryset(self):
         # Show only accounts owned by logged in user
