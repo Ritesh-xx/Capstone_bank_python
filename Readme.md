@@ -29,7 +29,7 @@ Domlur National Bank is a lightweight core banking application that provides use
       * CSS3
       * Vanilla JavaScript (ES6+)
   * **Database**:
-      * SQLite3 (Default, easily configurable for PostgreSQL, etc.)
+      * MySQL
 
 -----
 
